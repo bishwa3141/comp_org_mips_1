@@ -50,12 +50,25 @@
 
 
 	compute:
+		# The code below uses the following algorithm to find the decimal value for a valid hex string
+		# Initiliaze Result to 0
+		# Step 1: Multiply Result by 16, Result = Result * 16
+		# Step 2: Find value represented by the character.
+		# Step 3: Add the value to the result.
+		# Follow 1 to 3 for every character
+
+		# Suppose the string is "ABC"
+		# For A, 1. Result = 0 * 16 = 0,		2. A = 10,	3. Result = 0 + 10 = 10
+		# For B, 1. Result = 10 * 16 = 160, 	2. B = 11, 	3.Result = 160 + 11 = 171
+		# For C, 1. Result =  171 * 16 = 2736, 	2. C = 12,	3. Result = 2736 + 12 = 2748
+		# Hence, ABC_16 = 2748_10
+
 
 		la 	$s4, 1					# Making note that a character has been found.
 
 		blt $a0, 48, invalid 		# checks if the number is less than 48. Goes to invalid if true
 
-		ble $a0, 57, valid_num			# Checks if the ASCII of character is less than 58. At this point,
+		ble $a0, 57, valid_num		# Checks if the ASCII of character is less than 58. At this point,
 									# already greater than 48, so it is a valid num in the range 0-9
 
 		blt $a0, 65, invalid 		# Checks if the ASCII of character is less than 68. At this point,
