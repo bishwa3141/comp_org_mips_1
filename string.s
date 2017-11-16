@@ -12,17 +12,13 @@
 		la $s3, 0					# Boolean for checking if a space is found after a valid character
 		la $s4, 0					# Boolean for valid character found
 
-		la $a0, input_message		# Passing the prompt message address to the register
-		la $a1, 9					# Setting the maximum length of the string
-		li $v0, 4					#Syscall code for Printing
-		syscall
-
 		# Code to read user input
 		li $v0, 8							#	Syscall code for user input
-		la $a0, input 						#Save the
-		move $t0, $a0						# Save the string to t0 register
+		la $a0, input 						#	Reading from the output
+		li $a1, 9							# 	Maximum length for the string to be read from input
+		move $t0, $a0						# 	Save the string to t0 register
 
-		syscall
+		syscall 							#Making the read syscall
 
 
 
@@ -89,12 +85,55 @@
 
 		beqz $s4, invalid 			#If no valid characters found by the end of the loop, treat it as invalid
 
+		la $s4, 1000				# For very large numbers, directly printing the results gives negative results
+									# So, to overcome that the number is divided by a power of 10, which allows separate
+									# registers to hold the value for the quotient and the remainder which are printed
+									# separately
+
+		divu $s1, $s4				# Finding the quotient and the remainder
+
+		mfhi $s1					# Storing the remainder in $s1
+		mflo $s2					# Storing the quotient in $s2
+
+		beq $s2, $zero, rem_print	# To avoid printing 0 if either the remainder or quotient is zero, the two cases
+									# are handled separately
+
+		beq $s1, $zero, quot_print	#
+
+		j complete_print			# If neither are zero, both are printed
+
+		
+
+	quot_print:
 		li $v0, 1					# Syscall code for printing out an integer
-		move $a0, $s1
+		move $a0, $s2				# Transfer $s2 to $a0 for printing
+		syscall 					
+
+		li	$v0, 10					# system call code for exit = 10
+		syscall
+
+	rem_print:
+		li $v0, 1					# Syscall code for printing out an integer
+		move $a0, $s1				# Transfer $s1 to $a0 for printing
 		syscall
 
 		li	$v0, 10		# system call code for exit = 10
 		syscall
+
+	complete_print:
+
+		
+		li $v0, 1					# Syscall code for printing out an integer
+		move $a0, $s2				# Transfer $s1 to $a0 for printing
+		syscall
+
+		li $v0, 1					# Syscall code for printing out an integer
+		move $a0, $s1				# Transfer $s2 to $a0 for printing
+		syscall
+
+
+		li	$v0, 10					# system call code for exit = 10
+		syscall 					
 
 
 	invalid:
@@ -137,5 +176,5 @@
 
 		la 	$s3, 1							# Making note of a space found after a character is found
 
-		j loop_through
+		j loop_through						# return back to the loop
 
